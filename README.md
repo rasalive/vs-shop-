@@ -1,5 +1,5 @@
 # ⚡ Vortex — Gaming & Digital Asset Marketplace
-
+v2
 A production-ready full-stack eCommerce web application inspired by leading gaming and service marketplaces such as **WaveBoosts**, **Eldorado.gg**, and **G2G**.
 
 Built with **Next.js 15 (App Router)**, **React 19**, **TypeScript**, **Tailwind CSS v4**, **Framer Motion**, and **Prisma ORM**.

@@ -1,0 +1,304 @@
+// Prisma Schema for Vortex Digital & Gaming Marketplace
+// SQLite for instant zero-config local run, PostgreSQL for production Docker
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String?
+  avatar        String?
+  phone         String?
+  role          String    @default("CUSTOMER") // CUSTOMER, SUPPORT, ADMIN
+  status        String    @default("ACTIVE")   // ACTIVE, SUSPENDED, MUTED, BANNED
+  walletBalance Float     @default(0.0)
+  totalSpent    Float     @default(0.0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  orders             Order[]
+  purchases          Purchase[]
+  reviews            Review[]
+  tickets            Ticket[]
+  ticketMessages     TicketMessage[]
+  walletTransactions WalletTransaction[]
+  auditLogs          AuditLog[]
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+}
+
+model WalletTransaction {
+  id          String   @id @default(cuid())
+  userId      String
+  amount      Float
+  type        String   // DEPOSIT, PURCHASE, REFUND, ADMIN_ADJUST
+  description String
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  image       String?
+  icon        String?
+  order       Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  products    Product[]
+
+  @@index([slug])
+  @@index([isActive])
+}
+
+model Product {
+  id             String           @id @default(cuid())
+  title          String
+  slug           String           @unique
+  description    String
+  instructions   String?
+  categoryId     String
+  price          Float
+  comparePrice   Float?
+  coverImage     String?
+  badge          String?
+  deliveryType   String           @default("INSTANT_KEYS") // INSTANT_KEYS, MANUAL, DOWNLOAD
+  deliveryTime   String           @default("Instant (0-2m)")
+  warrantyPeriod String           @default("Lifetime Warranty")
+  stock          Int              @default(10)
+  totalSold      Int              @default(0)
+  rating         Float            @default(5.0)
+  reviewCount    Int              @default(120)
+  isActive       Boolean          @default(true)
+  isFeatured     Boolean          @default(false)
+  tags           String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  category       Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  images         ProductImage[]
+  features       ProductFeature[]
+  inventory      InventoryItem[]
+  orderItems     OrderItem[]
+  purchases      Purchase[]
+  reviews        Review[]
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([isFeatured])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  url       String
+  isPrimary Boolean  @default(false)
+
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model ProductFeature {
+  id        String   @id @default(cuid())
+  productId String
+  feature   String
+
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model InventoryItem {
+  id             String    @id @default(cuid())
+  productId      String
+  content        String    // Key, username:password, license code
+  status         String    @default("AVAILABLE") // AVAILABLE, RESERVED, SOLD
+  timesDelivered Int       @default(0)
+  notes          String?
+  orderId        String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  product        Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([status])
+}
+
+model Order {
+  id             String      @id @default(cuid())
+  orderNumber    String      @unique
+  userId         String?
+  subtotal       Float
+  discountAmount Float       @default(0.0)
+  taxAmount      Float       @default(0.0)
+  totalAmount    Float
+  currency       String      @default("USD")
+  status         String      @default("PENDING") // PENDING, COMPLETED, CANCELLED, REFUNDED
+  paymentStatus  String      @default("PENDING") // PENDING, PAID, FAILED, REFUNDED
+  paymentMethod  String      @default("STRIPE")  // STRIPE, RAZORPAY, PAYPAL, CRYPTO, WALLET, WHATSAPP
+  couponCode     String?
+  notes          String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  user           User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items          OrderItem[]
+  payments       Payment[]
+  purchases      Purchase[]
+
+  @@index([orderNumber])
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id           String   @id @default(cuid())
+  orderId      String
+  productId    String
+  productTitle String
+  unitPrice    Float
+  quantity     Int
+  subtotal     Float
+
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  orderId       String
+  amount        Float
+  currency      String   @default("USD")
+  gateway       String
+  status        String   @default("PENDING") // PENDING, SUCCESS, FAILED
+  transactionId String?
+  createdAt     DateTime @default(now())
+
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model Purchase {
+  id          String   @id @default(cuid())
+  orderId     String
+  userId      String?
+  productId   String
+  keySecret   String
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([productId])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  productId  String
+  userId     String
+  rating     Int      @default(5)
+  comment    String
+  isVerified Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([userId])
+}
+
+model Ticket {
+  id           String          @id @default(cuid())
+  ticketNumber String          @unique
+  userId       String
+  orderId      String?
+  department   String          @default("GENERAL") // GENERAL, ORDER_ISSUE, REPLACEMENT, BILLING
+  subject      String
+  priority     String          @default("MEDIUM")  // LOW, MEDIUM, HIGH
+  status       String          @default("OPEN")    // OPEN, ANSWERED, CUSTOMER_REPLY, RESOLVED, CLOSED
+  staffNotes   String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages     TicketMessage[]
+
+  @@index([ticketNumber])
+  @@index([userId])
+  @@index([status])
+}
+
+model TicketMessage {
+  id        String   @id @default(cuid())
+  ticketId  String
+  userId    String
+  message   String
+  isStaff   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([userId])
+}
+
+model Coupon {
+  id              String    @id @default(cuid())
+  code            String    @unique
+  discountPercent Float
+  minPurchase     Float     @default(0.0)
+  maxUses         Int?
+  timesUsed       Int       @default(0)
+  expiresAt       DateTime?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+
+  @@index([code])
+  @@index([isActive])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+}

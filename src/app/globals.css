@@ -1,0 +1,158 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: #f5f6fb;
+    --foreground: #0f172a;
+    --card: #ffffff;
+    --card-foreground: #0f172a;
+    --primary: #5842f5;
+    --primary-foreground: #ffffff;
+    --accent: #635bff;
+    --accent-light: #eeedff;
+    --border: #e2e8f0;
+    --muted: #64748b;
+  }
+
+  body {
+    background-color: #f5f6fb;
+    color: #0f172a;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+}
+
+/* Zyvoo Soft Floating Card & Shadow Styles */
+.zyvoo-card {
+  background: #ffffff;
+  border-radius: 1.75rem;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 10px 30px -10px rgba(99, 91, 255, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.zyvoo-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px -15px rgba(99, 91, 255, 0.16), 0 8px 12px -4px rgba(0, 0, 0, 0.04);
+  border-color: rgba(99, 91, 255, 0.25);
+}
+
+.zyvoo-card-hero {
+  background: #ffffff;
+  border-radius: 2.25rem;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 25px 60px -15px rgba(88, 66, 245, 0.14), 0 10px 20px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Zyvoo 3D Claymorphic Card (Matching User Screenshot) */
+.zyvoo-clay-card {
+  background: linear-gradient(145deg, #f4f6fb 0%, #edf0f7 100%);
+  border-radius: 2.25rem;
+  box-shadow: 
+    0 12px 32px -6px rgba(160, 175, 205, 0.38),
+    0 4px 12px -2px rgba(160, 175, 205, 0.2),
+    inset 0 2px 3px rgba(255, 255, 255, 0.95),
+    inset 0 -2px 3px rgba(160, 175, 205, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.zyvoo-clay-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 18px 40px -6px rgba(140, 155, 190, 0.45),
+    0 6px 16px -2px rgba(140, 155, 190, 0.25),
+    inset 0 2px 3px rgba(255, 255, 255, 1);
+}
+
+/* Deep Recessed 3D Well Socket */
+.zyvoo-3d-well {
+  background: #e4e8f2;
+  border-radius: 1.75rem;
+  box-shadow: 
+    inset 4px 4px 10px rgba(155, 170, 195, 0.7),
+    inset -4px -4px 10px rgba(255, 255, 255, 0.95);
+}
+
+/* Deep 3D Inset Input (Matching Zyvoo screenshot) */
+.zyvoo-3d-input {
+  background: #e6ebf4;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 
+    inset 3px 3px 7px rgba(160, 175, 205, 0.65),
+    inset -3px -3px 7px rgba(255, 255, 255, 0.95);
+  transition: all 0.2s ease;
+}
+
+.zyvoo-3d-input:focus {
+  background: #edf1fa;
+  outline: none;
+  box-shadow: 
+    inset 3px 3px 8px rgba(140, 155, 190, 0.75),
+    inset -3px -3px 8px rgba(255, 255, 255, 1),
+    0 0 0 2px rgba(88, 66, 245, 0.25);
+}
+
+/* Floating 3D Icon Plate inside the Well */
+.zyvoo-3d-plate {
+  border-radius: 1.35rem;
+  box-shadow: 
+    4px 6px 16px rgba(135, 150, 180, 0.42),
+    -2px -2px 6px rgba(255, 255, 255, 0.95);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.zyvoo-clay-card:hover .zyvoo-3d-plate {
+  transform: scale(1.06) translateY(-1px);
+}
+
+/* Concentric radial rings for hero background (as in Zyvoo screenshot) */
+.zyvoo-radial-rings {
+  position: absolute;
+  top: 50%;
+  right: -5%;
+  transform: translateY(-50%);
+  width: 550px;
+  height: 550px;
+  border-radius: 9999px;
+  border: 45px solid rgba(235, 238, 250, 0.65);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.zyvoo-radial-rings::before {
+  content: "";
+  position: absolute;
+  inset: 50px;
+  border-radius: 9999px;
+  border: 45px solid rgba(240, 242, 253, 0.8);
+}
+
+.zyvoo-radial-rings::after {
+  content: "";
+  position: absolute;
+  inset: 140px;
+  border-radius: 9999px;
+  border: 45px solid rgba(245, 247, 255, 0.9);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
